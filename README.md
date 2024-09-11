@@ -9,9 +9,12 @@ cd image-processing
 docker compose up
 ```
 - Import the test.postman_collection.json file to the Postman collection
-- Ready to go!
+- Ready to go! 🎉
+
+- Check swagger documentation: http://localhost:3000/api-docs/ (It's http not https).
 
 - LLD DIAGRAM: https://drive.google.com/file/d/1OWEPv5IOqDOzh2MMPftBCymYH8tGm32n/view?usp=sharing
+
 
 ## 1. Objective
 The objective of this system is to provide a scalable and efficient solution to process image URLs provided via a CSV file. The images are compressed and stored, and the user can retrieve the processing status or get notified through a webhook once the process completes.
