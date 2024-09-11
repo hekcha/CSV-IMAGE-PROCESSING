@@ -1,32 +1,35 @@
-version: '3'
-
+version: '3.3'
 services:
-  node-app:
-    build: .
-    image: node-app
-    environment:
-      - MONGODB_URL=mongodb://mongodb:27017/node-boilerplate
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
-      - '3000:3000'
+      - "3000:3000"
+    volumes:
+      - .:/usr/src/app
     depends_on:
-      - mongodb
-    volumes:
-      - .:/usr/src/node-app
+      - mongo
+    environment:
+      - PORT=3000
+      - MONGODB_URL=mongodb://mongo:27017/csvHandler  # Corrected port
     networks:
-      - node-network
+      - app-network
 
-  mongodb:
-    image: mongo:4.2.1-bionic
+  mongo:
+    image: mongo:latest
     ports:
-      - '27017:27017'
+      - "2703:27017"
     volumes:
-      - dbdata:/data/db
+      - mongo-data:/data/db
     networks:
-      - node-network
+      - app-network
 
 volumes:
-  dbdata:
+  mongo-data:
+    driver: local
 
 networks:
-  node-network:
+  app-network:
     driver: bridge
+

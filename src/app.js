@@ -4,12 +4,13 @@ const xss = require('xss-clean');
 const mongoSanitize = require('express-mongo-sanitize');
 const compression = require('compression');
 const cors = require('cors');
-const { authLimiter } = require('./middlewares/rateLimiter');
 const routes = require('./routes');
 const { errorConverter, errorHandler } = require('./middlewares/error');
 const ApiError = require('./utils/ApiError');
 const fileUpload = require('express-fileupload');
 const swaggerDocs = require('./docs/swaggerDef'); 
+
+const httpStatus = require('http-status');
 
 
 

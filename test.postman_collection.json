@@ -1,0 +1,66 @@
+{
+	"info": {
+		"_postman_id": "b5465fd5-fe98-4d2d-8a87-94cc63f12f14",
+		"name": "sense ai",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "29156594"
+	},
+	"item": [
+		{
+			"name": "upload csv",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "csv",
+							"type": "file",
+							"src": "/home/abhishek/Documents/image-processing/tests/file1.csv"
+						},
+						{
+							"key": "callbackURL",
+							"value": "https://webhook.site/dffa137e-39e9-4b85-8b03-21cc61c61129",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:3000/csvHandler/upload",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"csvHandler",
+						"upload"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getStatus",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000/csvHandler/status/123e4567-e89b-12d3-a456-426614174000",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"csvHandler",
+						"status",
+						"123e4567-e89b-12d3-a456-426614174000"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

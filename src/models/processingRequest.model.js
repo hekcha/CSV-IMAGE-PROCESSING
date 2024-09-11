@@ -21,7 +21,10 @@ const processingRequestSchema = new mongoose.Schema({
       inputImageUrls: [{ type: String, required: true }],
       outputImageUrls: [{ type: String }]
     }
-  ]
+  ],
+  csvFile: { 
+    type: String  // Field to store the CSV file content as a string
+  }
 }, {
   timestamps: true  // Automatically adds createdAt and updatedAt fields
 });

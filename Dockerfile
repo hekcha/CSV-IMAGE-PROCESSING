@@ -1,15 +1,24 @@
-FROM node:alpine
+# Use the official Node.js image.
+FROM node:18
 
-RUN mkdir -p /usr/src/node-app && chown -R node:node /usr/src/node-app
+# Set the working directory in the container
+WORKDIR /usr/src/app
 
-WORKDIR /usr/src/node-app
+# Copy the package.json and package-lock.json to install dependencies
+COPY package*.json ./
 
-COPY package.json yarn.lock ./
+# Install the necessary dependencies
+RUN npm install
 
-USER node
+# Copy the rest of the application code into the container
+COPY . .
 
-RUN yarn install --pure-lockfile
+# Set environment variables
+ENV PORT=3000
+ENV MONGODB_URL=mongodb://127.0.0.1:27017/csvHandler
 
-COPY --chown=node:node . .
-
+# Expose the port the app runs on
 EXPOSE 3000
+
+# Command to run the application
+CMD ["npm", "start"]

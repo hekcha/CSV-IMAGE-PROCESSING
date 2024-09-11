@@ -7,7 +7,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /upload:
+ * /csvHandler/upload:
  *   post:
  *     summary: Upload CSV for image processing
  *     description: Upload a CSV file containing image URLs, which will be asynchronously processed (compressed). A request ID is returned to check the status later.
@@ -42,23 +42,27 @@ const router = express.Router();
  *         description: Error in processing CSV.
  */
 
+
 router.post('/upload', uploadCSV);
 
 // Route to check the processing status
 
 /**
  * @swagger
- * /status:
+ * /csvHandler/status:
  *   get:
  *     summary: Check the status of the image processing
  *     description: Retrieve the current status of image processing using the request ID provided during CSV upload.
- *     parameters:
- *       - in: query
- *         name: requestId
- *         schema:
- *           type: string
- *         required: true
- *         description: The unique ID of the processing request.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               requestId:
+ *                 type: string
+ *                 example:  e265beb5-4012-4ca6-9912-961dd68b9417
  *     responses:
  *       200:
  *         description: Status of the image processing.
@@ -94,6 +98,7 @@ router.post('/upload', uploadCSV);
  *       500:
  *         description: Error in checking status.
  */
+
 
 router.get('/status', checkStatus);
 

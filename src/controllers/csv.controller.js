@@ -8,6 +8,7 @@ const Joi = require('joi');
 const logger = require('../config/logger'); // Import the logger
 const compressImages = require('../utils/compressImage');
 const triggerWebhook = require('../utils/triggerWebhook');
+const {Parser} = require('json2csv'); 
 
 // Validation function for JSON data
 async function validateJSON(jsonData) {
@@ -36,7 +37,9 @@ async function validateJSON(jsonData) {
 }
 
 // Upload CSV and start processing images
+// Upload CSV and start processing images
 const uploadCSV = async (req, res) => {
+  logger.error('Processing CSV file');
   let processingRequests = {};
 
   try {
@@ -96,26 +99,41 @@ const uploadCSV = async (req, res) => {
   }
 };
 
+
 // Check status of image processing using requestId
 const checkStatus = async (req, res) => {
   try {
     const requestId = req.body.requestId;
-    console.log(requestId)
     const request = await ProcessingRequest.findOne({ requestId });
 
     if (!request) {
       return res.status(404).send('Request ID not found');
     }
 
-    res.send({ ...request?._doc });
+    if (request.status === 'Completed' && request.csvFile) {
+      // Send the CSV file in the response
+      res.setHeader('Content-Disposition', `attachment; filename="processed_images_${requestId}.csv"`);
+      res.setHeader('Content-Type', 'text/csv');
+      return res.status(200).end(request.csvFile); // Return the saved CSV from the database
+    } else {
+      return res.status(200).json({
+        requestId: request.requestId,
+        status: request.status,
+        message: request.message,
+        data: request.data
+      });
+    }
+
   } catch (error) {
     logger.error(`Error checking status for request ID ${req.params.requestId}: ${error.message}`);
     res.status(500).send('Error checking request status.');
   }
 };
 
+
 // Function to process images asynchronously
-const processImages = async (requestId, results, callbackUrl) => {
+
+const processImages = async (requestId, results, callbackUrl, res) => {
   try {
     const processedData = [];
 
@@ -123,34 +141,44 @@ const processImages = async (requestId, results, callbackUrl) => {
       const inputImageUrls = row.inputImageUrls;
       const outputImageUrls = await compressImages(inputImageUrls);
 
-      if(outputImageUrls == null){
-        throw new Error('Image processing failed. Failed in comression of images');
+      if (outputImageUrls == null) {
+        throw new Error('Image processing failed. Failed in compression of images');
       }
+
       // Format the data as per the required structure
       processedData.push({
-        _id: row._id,  // Assuming row._id already exists
         serialNumber: row.serialNumber,
         productName: row.productName,
-        inputImageUrls,
-        outputImageUrls
+        inputImageUrls: inputImageUrls.join(','), // Join array into CSV format
+        outputImageUrls: outputImageUrls.join(','), // Join array into CSV format
       });
     }
 
-    // Store the properly formatted data into MongoDB
+    // Convert processedData to CSV format
+    const csvFields = ['serialNumber', 'productName', 'inputImageUrls', 'outputImageUrls'];
+    const json2csvParser = new Parser({ fields: csvFields });
+    const csv = json2csvParser.parse(processedData);
+
+    // Store the properly formatted data along with CSV into MongoDB
     await ProcessingRequest.updateOne(
       { requestId },
-      { data: processedData, status: 'Completed', message: 'Image processing completed' }
+      { 
+        data: processedData, 
+        status: 'Completed', 
+        message: 'Image processing completed',
+        csvFile: csv  // Save CSV as string in the database
+      }
     );
 
-    // Trigger the webhook
+    // Trigger the webhook with the processed CSV if needed
     await triggerWebhook(requestId, callbackUrl, 'completed');
+
   } catch (error) {
     logger.error(`Error processing images for request ID ${requestId}: ${error.message}`);
-    await ProcessingRequest.updateOne({ requestId }, { status: 'Failed', message: 'Image processing failed. Failed in comression of images' });
+    await ProcessingRequest.updateOne({ requestId }, { status: 'Failed', message: 'Image processing failed. Failed in compression of images' });
     await triggerWebhook(requestId, callbackUrl, 'failed', error.message);
   }
 };
-
 
 
 
